@@ -159,8 +159,10 @@ class auth_plugin_external extends auth_plugin_base {
                 return true;
             }
         }
-        var_dump($user);
         $DB->set_field("user", "confirmed", 1, array("id"=>$user->id));
+
+        $url = new \moodle_url('/', array());
+        redirect($url,'', 5);
     }
 
     /**
