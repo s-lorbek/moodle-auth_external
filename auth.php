@@ -57,9 +57,9 @@ class auth_plugin_external extends auth_plugin_base {
      * @param string $password The password
      * @return bool Authentication success or failure.
      */
-    function user_login ($username, $password) {
+    public function user_login ($username, $password) {
         global $CFG, $DB;
-        if ($user = $DB->get_record('user', array('username'=>$username, 'mnethostid'=>$CFG->mnet_localhost_id))) {
+        if ($user = $DB->get_record('user', array('username' => $username, 'mnethostid' => $CFG->mnet_localhost_id))) {
             return validate_internal_user_password($user, $password);
         }
         return false;
@@ -75,7 +75,7 @@ class auth_plugin_external extends auth_plugin_base {
      * @return boolean result
      *
      */
-    function user_update_password($user, $newpassword) {
+    public function user_update_password($user, $newpassword) {
         $user = get_complete_user_data('id', $user->id);
         // This will also update the stored hash to the latest algorithm
         // if the existing hash is using an out-of-date algorithm (or the
@@ -83,7 +83,7 @@ class auth_plugin_external extends auth_plugin_base {
         return update_internal_user_password($user, $newpassword);
     }
 
-    function can_signup() {
+    public function can_signup() {
         return true;
     }
 
@@ -94,7 +94,7 @@ class auth_plugin_external extends auth_plugin_base {
      * @param object $user new user object
      * @param boolean $notify print notice with link and terminate
      */
-    function user_signup($user, $notify=true) {
+    public function user_signup($user, $notify=true) {
         // Standard signup, without custom confirmatinurl.
         return $this->user_signup_with_confirmation($user, $notify);
     }
@@ -127,7 +127,7 @@ class auth_plugin_external extends auth_plugin_base {
 
         user_add_password_history($user->id, $plainpassword);
 
-        // Setting external profile fields
+        // Setting external profile fields.
         $user->profile_field_external_user = 1;
         $user->profile_field_external_user_verified = 0;
 
@@ -142,9 +142,9 @@ class auth_plugin_external extends auth_plugin_base {
         // Trigger event.
         \core\event\user_created::create_from_userid($user->id)->trigger();
 
-        if($this->is_email_confirmation_enabled()){
+        if ($this->is_email_confirmation_enabled()) {
             if (! send_confirmation_email($user, $confirmationurl)) {
-                print_error('auth_emailnoemail', 'auth_external');
+                throw new moodle_exception('auth_emailnoemail', 'auth_external');
             }
 
             if ($notify) {
@@ -159,10 +159,10 @@ class auth_plugin_external extends auth_plugin_base {
                 return true;
             }
         }
-        $DB->set_field("user", "confirmed", 1, array("id"=>$user->id));
+        $DB->set_field("user", "confirmed", 1, array("id" => $user->id));
 
         $url = new \moodle_url('/', array());
-        redirect($url,'', 5);
+        redirect($url, '', 5);
     }
 
     /**
@@ -170,7 +170,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    function can_confirm() {
+    public function can_confirm() {
         return true;
     }
 
@@ -180,7 +180,7 @@ class auth_plugin_external extends auth_plugin_base {
      * @param string $username
      * @param string $confirmsecret
      */
-    function user_confirm($username, $confirmsecret) {
+    public function user_confirm($username, $confirmsecret) {
         global $DB, $SESSION;
         $user = get_complete_user_data('username', $username);
 
@@ -191,8 +191,8 @@ class auth_plugin_external extends auth_plugin_base {
             } else if ($user->secret === $confirmsecret && $user->confirmed) {
                 return AUTH_CONFIRM_ALREADY;
 
-            } else if ($user->secret === $confirmsecret) {   // They have provided the secret key to get in
-                $DB->set_field("user", "confirmed", 1, array("id"=>$user->id));
+            } else if ($user->secret === $confirmsecret) {   // They have provided the secret key to get in.
+                $DB->set_field("user", "confirmed", 1, array("id" => $user->id));
 
                 if ($wantsurl = get_user_preferences('auth_email_wantsurl', false, $user)) {
                     // Ensure user gets returned to page they were trying to access before signing up.
@@ -207,7 +207,7 @@ class auth_plugin_external extends auth_plugin_base {
         }
     }
 
-    function prevent_local_passwords() {
+    public function prevent_local_passwords() {
         return false;
     }
 
@@ -216,7 +216,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    function is_internal() {
+    public function is_internal() {
         return true;
     }
 
@@ -226,7 +226,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    function can_change_password() {
+    public function can_change_password() {
         return true;
     }
 
@@ -236,8 +236,8 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return moodle_url
      */
-    function change_password_url() {
-        return null; // use default internal method
+    public function change_password_url() {
+        return null; // use default internal method.
     }
 
     /**
@@ -245,7 +245,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    function can_reset_password() {
+    public function can_reset_password() {
         return true;
     }
 
@@ -254,7 +254,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    function can_be_manually_set() {
+    public function can_be_manually_set() {
         return true;
     }
 
@@ -262,12 +262,11 @@ class auth_plugin_external extends auth_plugin_base {
      * Returns whether or not the captcha element is enabled.
      * @return bool
      */
-    function is_captcha_enabled() {
+    public function is_captcha_enabled() {
         return get_config("auth_{$this->authtype}", 'recaptcha');
     }
 
-    function is_email_confirmation_enabled() {
+    public function is_email_confirmation_enabled() {
         return get_config("auth_{$this->authtype}", 'email_confirm');
     }
-
 }
