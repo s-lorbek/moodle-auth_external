@@ -25,6 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir.'/authlib.php');
+require_once('classes/message.php');
+
 
 /**
  * Email authentication plugin.
@@ -117,6 +119,19 @@ class auth_plugin_external extends auth_plugin_base {
         require_once($CFG->dirroot.'/user/profile/lib.php');
         require_once($CFG->dirroot.'/user/lib.php');
 
+        //BEGIN USI Generated Username
+        if(\get_config("auth_external", "generated_username")) {
+            $user->username = \get_config("auth_external", "auth_username_prefix") .
+                strtolower($user->lastname . substr($user->firstname, 0, 3));
+            global $DB;
+            $postfix = 2;
+            while ($DB->record_exists("user", array("username" => $user->username))) {
+                $user->username = $user->username . $postfix;
+                $postfix++;
+            }
+        }
+        //END
+
         $plainpassword = $user->password;
         $user->password = hash_internal_user_password($user->password);
         if (empty($user->calendartype)) {
@@ -128,8 +143,9 @@ class auth_plugin_external extends auth_plugin_base {
         user_add_password_history($user->id, $plainpassword);
 
         // Setting external profile fields.
-        $user->profile_field_external_user = 1;
+        $user->profile_field_external_user = true;
         $user->profile_field_external_user_verified = 0;
+        $user->profile_field_external_user_pending = false;
 
         // Save any custom profile field information.
         profile_save_data($user);
@@ -161,7 +177,11 @@ class auth_plugin_external extends auth_plugin_base {
         }
         $DB->set_field("user", "confirmed", 1, array("id" => $user->id));
 
-        $url = new \moodle_url('/', array());
+        if(\get_config("auth_external", "generated_username")) {
+            send_message($user->id, null, " " .  $user->username);
+        }
+
+        $url = new \moodle_url($SESSION->wantsurl, array());
         redirect($url, '', 5);
     }
 
@@ -268,5 +288,13 @@ class auth_plugin_external extends auth_plugin_base {
 
     public function is_email_confirmation_enabled() {
         return get_config("auth_{$this->authtype}", 'email_confirm');
+    }
+
+    public function signup_form() {
+        global $CFG;
+
+        require_once($CFG->dirroot.'/auth/external/signup_form.php');
+        return new login_signup_form(null, null, 'post', '',
+            array('autocomplete'=>'on'));
     }
 }

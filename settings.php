@@ -43,8 +43,25 @@ if ($ADMIN->fulltree) {
         new lang_string('auth_email_confirm', 'auth_external'),
         new lang_string('auth_email', 'auth_external'), 0, $options));
 
+    $settings->add(new admin_setting_configselect('auth_external/generated_username',
+        new lang_string('auth_generated_user', 'auth_external'),
+        new lang_string('auth_generated_user_desc', 'auth_external'), 0, $options));
+
+    $settings->add(new admin_setting_configtext('auth_external/generated_prefix',
+        new lang_string('auth_username_prefix', 'auth_external'),
+        new lang_string('auth_username_prefix_desc', 'auth_external'), "external_"));
+
+    $settings->add(new admin_setting_configtext('auth_external/email_subject_confirm',
+        new lang_string('auth_email_subject_confirm', 'auth_external'),
+        new lang_string('auth_email_subject', 'auth_external'), "Signup confirmation"));
+
+    $settings->add(new admin_setting_confightmleditor('auth_external/email_body_confirm',
+        new lang_string('auth_email_body_confirm', 'auth_external'),
+        new lang_string('auth_email_body', 'auth_external'), "{{username}}"));
+
     // Display locking / mapping of profile fields.
-    $authplugin = get_auth_plugin('email');
+    $authplugin = get_auth_plugin('external');
     display_auth_lock_options($settings, $authplugin->authtype, $authplugin->userfields,
             get_string('auth_fieldlocks_help', 'auth'), false, false);
+
 }

@@ -33,3 +33,16 @@ $string['auth_email'] = 'Enables email confirmation. If disabled external users 
 
 $string['pluginname'] = 'External User';
 $string['privacy:metadata'] = 'External User self-registration authentication plugin does not store any personal data.';
+
+$string['auth_usernameconfirm'] = '<p>External self-registration enables a user to create their own account via a \'Create new account\' button on the login page. The user then receives an email containing a secure link to a page where they can confirm their account. Future logins just check the username and password against the stored values in the Moodle database.</p><p>Note: In addition to enabling the plugin, email-based self-registration must also be selected from the self registration drop-down menu on the \'Manage authentication\' page.</p>';
+
+$string['auth_email_subject_confirm'] = "Signup E-Mail Subject";
+$string['auth_email_body_confirm'] = "Signup E-Mail Body";
+$string['auth_email_subject'] = "Subject of the notification mail a user receives for information about their generated username";
+$string['auth_email_body'] = "Be sure to include {{username}} in your template, as this is the placeholder for the users username. Other options are {{firstname}} and {{lastname}}";
+$string['auth_generated_user'] = "Generated Username";
+$string['auth_generated_user_desc'] = "Usernames are generated instead of entered during signup";
+$string['auth_username_prefix'] = "Generated Username Prefix";
+$string['auth_username_prefix_desc'] = "String to be prefixed to a generated username";
+
+
