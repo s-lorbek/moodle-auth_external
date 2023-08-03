@@ -14,16 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
- * Privacy Subsystem implementation for auth_email.
+ * Privacy Subsystem implementation for auth_external.
  *
- * @package    auth_email
+ * @package    auth_external
  * @copyright  2018 Carlos Escobedo <carlos@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-namespace auth_email\privacy;
+namespace auth_external\privacy;
 defined('MOODLE_INTERNAL') || die();
 /**
- * Privacy Subsystem for auth_email implementing null_provider.
+ * Privacy Subsystem for auth_external implementing null_provider.
  *
  * @copyright  2018 Carlos Escobedo <carlos@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
