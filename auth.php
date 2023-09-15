@@ -177,9 +177,9 @@ class auth_plugin_external extends auth_plugin_base {
         }
         $DB->set_field("user", "confirmed", 1, array("id" => $user->id));
 
-        if(\get_config("auth_external", "generated_username")) {
-            send_message($user->id, null, " " .  $user->username);
-        }
+        //if(\get_config("auth_external", "generated_username")) {
+        send_message($user->id, null, " " .  $user->username);
+        //}
 
         $url = new \moodle_url($SESSION->wantsurl, array());
         redirect($url, '', 5);
