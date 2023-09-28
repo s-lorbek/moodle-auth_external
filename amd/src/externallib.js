@@ -20,7 +20,8 @@ export const clearSelection = () => {
 export const addPasswordCheck = () => {
     jQuery(document).ready(function() {
         const label = '<div class="col-md-3 col-form-label d-flex pb-0 pr-md-0">' +
-            '<label id="id_password_label" class="d-inline word-break " for="id_password">Kennwort wiederholen</label>'+
+            '<label id="id_password_label2" class="d-inline word-break " for="id_passwordConfirm">' +
+            'Kennwort wiederholen</label>' +
             '<div class="form-label-addon d-flex align-items-center align-self-start">' +
             '<div class="text-danger" title="Erforderlich">' +
             '<i class="icon fa fa-exclamation-circle text-danger fa-fw " title="Erforderlich" role="img"></i>' +
