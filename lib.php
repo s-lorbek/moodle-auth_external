@@ -24,11 +24,13 @@
 
 function auth_external_before_http_headers()
 {
-    global $PAGE, $USER, $DB;
+    global $PAGE;
     if (strpos($PAGE->url, "/login/signup.php")) {
         $PAGE->requires->js_call_amd('auth_external/externallib',
             "clearSelection");
         $PAGE->requires->js_call_amd('auth_external/externallib',
             "addPasswordCheck");
+        $PAGE->requires->js_call_amd('auth_external/externallib',
+            "checkUniversityAffiliation");
     }
 }

@@ -2,8 +2,9 @@ import jQuery from 'jquery';
 
 export const clearSelection = () => {
     jQuery(document).ready(function() {
-        jQuery(".custom-select[name*=\"profile_field_gebdat\"]").append(new Option(" ", "-1"));
-        jQuery(".custom-select[name*=\"profile_field_gebdat\"]").val("-1");
+        let birthdateField = jQuery('.custom-select[name*="profile_field_gebdat"]');
+        birthdateField.append(new Option(" ", "-1"));
+        birthdateField.val("-1");
 
         jQuery('form').on('submit', function(event) {
             jQuery('select[name*="profile_field_gebdat"]').each(function() {
@@ -26,10 +27,11 @@ export const addPasswordCheck = () => {
             '<div class="text-danger" title="Erforderlich">' +
             '<i class="icon fa fa-exclamation-circle text-danger fa-fw " title="Erforderlich" role="img"></i>' +
             '</div></div></div>';
-        const additionalPasswordField = '<input type="password" class="form-control" name="password" ' +
+        const additionalPasswordField = '<input type="password" class="form-control" name="passwordConfirm" ' +
             'id="id_passwordConfirm" value="" size="12" maxlength="32" data-initial-value="">';
-        jQuery('div[id=\"fitem_id_password\"]').append(label);
-        jQuery('div[id=\"fitem_id_password\"]').append(additionalPasswordField);
+        let passwordDiv = jQuery('div[id="fitem_id_password"]');
+        passwordDiv.append(label);
+        passwordDiv.append(additionalPasswordField);
 
         jQuery('form').on('submit', function(event) {
             const pass1 = jQuery('#id_password').val();
@@ -40,5 +42,18 @@ export const addPasswordCheck = () => {
                     return false;
                 }
         });
+    });
+};
+
+export const checkUniversityAffiliation = () => {
+    jQuery('form').on('submit', function(event) {
+        const email = jQuery('#id_email').val();
+        var subdomain = "univie";
+        var regexPattern = new RegExp(subdomain + "\\.", "i");
+        if (regexPattern.test(email)) {
+            event.preventDefault();
+            alert("Bitte melden Sie sich mit Ihrer Universitäts-Mailadresse über Shibboleth an!");
+            return false;
+        }
     });
 };
