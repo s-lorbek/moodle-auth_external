@@ -45,7 +45,7 @@ $string['auth_generated_user_desc'] = "Usernames are generated instead of entere
 $string['auth_username_prefix'] = "Generated Username Prefix";
 $string['auth_username_prefix_desc'] = "String to be prefixed to a generated username";
 
-$string['auth_label'] = 'Kennwort wiederholen';
+$string['auth_label'] = 'Kennwort (wiederholen)';
 $string['auth_hint'] = 'Erforderlich';
 $string['auth_password_alert'] = 'Die eingegebenen Kennwörter stimmen nicht überein!';
 
