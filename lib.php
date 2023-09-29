@@ -17,20 +17,29 @@
 
 /**
  *
- * @package    auth_external
+ * @throws coding_exception
  * @copyright  2023 Stephan Lorbek
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package    auth_external
  */
 
 function auth_external_before_http_headers()
 {
     global $PAGE;
     if (strpos($PAGE->url, "/login/signup.php")) {
+        global $OUTPUT;
+        $passwordfieldstrings = array('label' => get_string('auth_label', 'auth_external'),
+            'auth_hint' => get_string('auth_hint', 'auth_external'));
+        $additionalpasswordfield = $OUTPUT->render_from_template("auth_external/passfield", $passwordfieldstrings);
         $PAGE->requires->js_call_amd('auth_external/externallib',
-            "clearSelection");
+            "addPasswordCheck", array($additionalpasswordfield,
+                get_string('auth_password_alert', 'auth_external')));
+
         $PAGE->requires->js_call_amd('auth_external/externallib',
-            "addPasswordCheck");
+            "clearSelection", array(get_string('auth_university_alert', 'auth_external')));
+
         $PAGE->requires->js_call_amd('auth_external/externallib',
-            "checkUniversityAffiliation");
+            "checkUniversityAffiliation",
+            array(get_string('auth_university_alert', 'auth_external')));
     }
 }

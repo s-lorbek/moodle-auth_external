@@ -1,6 +1,6 @@
 import jQuery from 'jquery';
 
-export const clearSelection = () => {
+export const clearSelection = (alertmsg) => {
     jQuery(document).ready(function() {
         let birthdateField = jQuery('.custom-select[name*="profile_field_gebdat"]');
         birthdateField.append(new Option(" ", "-1"));
@@ -10,7 +10,7 @@ export const clearSelection = () => {
             jQuery('select[name*="profile_field_gebdat"]').each(function() {
                 if (jQuery(this).find('option:selected[value="-1"]').length > 0) {
                     event.preventDefault();
-                    alert("Bitte geben Sie Ihr Geburtsdatum an");
+                    alert(alertmsg);
                     return false;
                 }
             });
@@ -18,41 +18,31 @@ export const clearSelection = () => {
     });
 };
 
-export const addPasswordCheck = () => {
+export const addPasswordCheck = (content, alertmsg) => {
     jQuery(document).ready(function() {
-        const label = '<div class="col-md-3 col-form-label d-flex pb-0 pr-md-0">' +
-            '<label id="id_password_label2" class="d-inline word-break " for="id_passwordConfirm">' +
-            'Kennwort wiederholen</label>' +
-            '<div class="form-label-addon d-flex align-items-center align-self-start">' +
-            '<div class="text-danger" title="Erforderlich">' +
-            '<i class="icon fa fa-exclamation-circle text-danger fa-fw " title="Erforderlich" role="img"></i>' +
-            '</div></div></div>';
-        const additionalPasswordField = '<input type="password" class="form-control" name="passwordConfirm" ' +
-            'id="id_passwordConfirm" value="" size="12" maxlength="32" data-initial-value="">';
         let passwordDiv = jQuery('div[id="fitem_id_password"]');
-        passwordDiv.append(label);
-        passwordDiv.append(additionalPasswordField);
+        passwordDiv.append(content);
 
         jQuery('form').on('submit', function(event) {
             const pass1 = jQuery('#id_password').val();
             const pass2 = jQuery('#id_passwordConfirm').val();
                 if (pass1 !== pass2) {
                     event.preventDefault();
-                    alert("Die eingegebenen Passwörter stimmen nicht überein!");
+                    alert(alertmsg);
                     return false;
                 }
         });
     });
 };
 
-export const checkUniversityAffiliation = () => {
+export const checkUniversityAffiliation = (alertmsg) => {
     jQuery('form').on('submit', function(event) {
         const email = jQuery('#id_email').val();
         var subdomain = "univie";
         var regexPattern = new RegExp(subdomain + "\\.", "i");
         if (regexPattern.test(email)) {
             event.preventDefault();
-            alert("Bitte melden Sie sich mit Ihrer Universitäts-Mailadresse über Shibboleth an!");
+            alert(alertmsg);
             return false;
         }
     });

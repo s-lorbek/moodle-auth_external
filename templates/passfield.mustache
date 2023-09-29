@@ -1,0 +1,15 @@
+{{!
+    @template auth_external/passfield
+}}
+
+<div class="col-md-3 col-form-label d-flex pb-0 pr-md-0">
+    <label id="id_password_label2" class="d-inline word-break " for="id_passwordConfirm">
+        {{label}}
+    </label>
+    <div class="form-label-addon d-flex align-items-center align-self-start">
+        <div class="text-danger" title="{{hint}}">
+            <i class="icon fa fa-exclamation-circle text-danger fa-fw " title="{{hint}}" role="img"></i>
+        </div>
+    </div>
+</div>
+<input type="password" class="form-control" name="passwordConfirm" id="id_passwordConfirm" value="" size="12" maxlength="32" data-initial-value="">
