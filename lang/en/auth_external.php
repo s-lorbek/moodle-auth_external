@@ -49,7 +49,7 @@ $string['auth_label'] = 'Password (again)';
 $string['auth_hint'] = 'Mandatory';
 $string['auth_password_alert'] = 'The passwords entered do not match!';
 
-$string['auth_university_alert'] = 'Please log in with your university mail address via your eduID!';
+$string['auth_university_alert'] = 'You have the option of logging in via eduID using your university e-mail address. Do you still want to proceed with the creation of the user account?';
 
 $string['auth_birthday_alert'] = "Please enter your birthdate!";
 

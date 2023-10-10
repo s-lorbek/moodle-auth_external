@@ -49,6 +49,6 @@ $string['auth_label'] = 'Kennwort (wiederholen)';
 $string['auth_hint'] = 'Erforderlich';
 $string['auth_password_alert'] = 'Die eingegebenen Kennwörter stimmen nicht überein!';
 
-$string['auth_university_alert'] = 'Bitte melden Sie sich mit Ihrer Universitäts-Mailadresse über Ihre eduID an!';
+$string['auth_university_alert'] = 'Sie haben die Möglichkeit sich mit Ihrer Universitäts-Mailadresse über eduID anzumelden. Möchten Sie dennoch mit der Erstellung des Benutzerkontos fortfahren?';
 
 $string['auth_birthday_alert'] = "Bitte geben Sie Ihr Geburtsdatum an!";

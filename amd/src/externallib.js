@@ -41,9 +41,10 @@ export const checkUniversityAffiliation = (alertmsg) => {
         var subdomain = "univie";
         var regexPattern = new RegExp(subdomain + "\\.", "i");
         if (regexPattern.test(email)) {
-            event.preventDefault();
-            alert(alertmsg);
-            return false;
+            if (!confirm(alertmsg)) {
+                event.preventDefault();
+                return false;
+            }
         }
     });
 };
