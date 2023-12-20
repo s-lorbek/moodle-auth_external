@@ -121,7 +121,7 @@ class auth_plugin_external extends auth_plugin_base {
 
         //BEGIN USI Generated Username
         if(\get_config("auth_external", "generated_username")) {
-            $user->username = \get_config("auth_external", "auth_username_prefix") .
+            $user->username = \get_config("auth_external", "generated_prefix") .
                 strtolower($user->lastname . substr($user->firstname, 0, 3));
             global $DB;
             $postfix = 2;
