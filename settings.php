@@ -55,6 +55,10 @@ if ($ADMIN->fulltree) {
         new lang_string('auth_email_subject_confirm', 'auth_external'),
         new lang_string('auth_email_subject', 'auth_external'), "Signup confirmation"));
 
+    $settings->add(new admin_setting_configtext('auth_external/subdomains',
+        "Subdomains",
+        "Subdomains to check during signup", ""));
+
     $settings->add(new admin_setting_confightmleditor('auth_external/email_body_confirm',
         new lang_string('auth_email_body_confirm', 'auth_external'),
         new lang_string('auth_email_body', 'auth_external'), "{{username}}"));

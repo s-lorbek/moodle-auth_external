@@ -40,6 +40,7 @@ function auth_external_before_http_headers()
 
         $PAGE->requires->js_call_amd('auth_external/externallib',
             "checkUniversityAffiliation",
-            array(get_string('auth_university_alert', 'auth_external')));
+            array(get_string('auth_university_alert', 'auth_external'),
+                get_config("auth_external", "subdomains")));
     }
 }

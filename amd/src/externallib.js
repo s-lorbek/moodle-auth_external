@@ -35,16 +35,21 @@ export const addPasswordCheck = (content, alertmsg) => {
     });
 };
 
-export const checkUniversityAffiliation = (alertmsg) => {
+export const checkUniversityAffiliation = (alertmsg, subdomains) => {
     jQuery('form').on('submit', function(event) {
         const email = jQuery('#id_email').val();
-        var subdomain = "univie";
-        var regexPattern = new RegExp(subdomain + "\\.", "i");
-        if (regexPattern.test(email)) {
-            if (!confirm(alertmsg)) {
-                event.preventDefault();
-                return false;
+        const parts = subdomains.split(",");
+
+        // eslint-disable-next-line consistent-return
+        parts.forEach(function(subdomain) {
+            var regexPattern = new RegExp(subdomain, "i");
+            if (regexPattern.test(email)) {
+                // eslint-disable-next-line no-alert
+                if (!confirm(alertmsg)) {
+                    event.preventDefault();
+                    return false;
+                }
             }
-        }
+        });
     });
 };
