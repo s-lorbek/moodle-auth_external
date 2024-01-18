@@ -44,12 +44,16 @@ $string['auth_generated_user'] = "Generated Username";
 $string['auth_generated_user_desc'] = "Usernames are generated instead of entered during signup";
 $string['auth_username_prefix'] = "Generated Username Prefix";
 $string['auth_username_prefix_desc'] = "String to be prefixed to a generated username";
+$string['auth_subdomains'] = "Subdomain Blacklist";
+$string['auth_subdomains_desc'] = "Enter your subdomains in a comma-separated format. These subdomains will be checked in the signup form. If any of the subdomains are present in the entered email, the user will be notified.";
+$string['auth_affiliation_error'] = 'EduID Hint';
+$string['auth_affiliation_error_desc'] = 'Warning message displayed as soon as a mail address from the subdomain blacklist is entered in the registration form';
 
 $string['auth_label'] = 'Password (again)';
 $string['auth_hint'] = 'Mandatory';
 $string['auth_password_alert'] = 'The passwords entered do not match!';
 
-$string['auth_university_alert'] = 'You have the option of logging in via eduID using your university e-mail address. Do you still want to proceed with the creation of the user account?';
+$string['auth_university_alert'] = 'You have the option of logging in with your university e-mail address via eduID. It is not necessary to switch to the university site. Please log in <a href="index.php">here</a>.';
 
 $string['auth_birthday_alert'] = "Please enter your birthdate!";
 

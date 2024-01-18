@@ -56,12 +56,17 @@ if ($ADMIN->fulltree) {
         new lang_string('auth_email_subject', 'auth_external'), "Signup confirmation"));
 
     $settings->add(new admin_setting_configtext('auth_external/subdomains',
-        "Subdomains",
-        "Subdomains to check during signup", ""));
+        new lang_string('auth_subdomains', 'auth_external'),
+        new lang_string('auth_subdomains_desc', 'auth_external'), ""));
 
     $settings->add(new admin_setting_confightmleditor('auth_external/email_body_confirm',
         new lang_string('auth_email_body_confirm', 'auth_external'),
         new lang_string('auth_email_body', 'auth_external'), "{{username}}"));
+
+    $settings->add(new admin_setting_confightmleditor('auth_external/affiliation_error',
+        new lang_string('auth_affiliation_error', 'auth_external'),
+        new lang_string('auth_affiliation_error_desc', 'auth_external'),
+        get_string('auth_university_alert', 'auth_external')));
 
     // Display locking / mapping of profile fields.
     $authplugin = get_auth_plugin('external');

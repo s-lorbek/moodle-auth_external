@@ -36,11 +36,11 @@ function auth_external_before_http_headers()
                 get_string('auth_password_alert', 'auth_external')));
 
         $PAGE->requires->js_call_amd('auth_external/externallib',
-            "clearSelection", array(get_string('auth_university_alert', 'auth_external')));
+            "clearSelection", array(get_string('auth_birthday_alert', 'auth_external')));
 
         $PAGE->requires->js_call_amd('auth_external/externallib',
             "checkUniversityAffiliation",
-            array(get_string('auth_university_alert', 'auth_external'),
+            array(get_config("auth_external", "affiliation_error"),
                 get_config("auth_external", "subdomains")));
     }
 }
