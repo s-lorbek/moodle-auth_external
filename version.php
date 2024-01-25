@@ -17,13 +17,13 @@
 /**
  * Version details
  *
- * @package    auth_email
- * @copyright  1999 onwards Martin Dougiamas (http://dougiamas.com)
+ * @package    auth_external
+ * @copyright  2024 Stephan Lorbek <stephan.lorbek@uni-graz.at>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2024011606;        // The current plugin version (Date: YYYYMMDDXX).
+$plugin->version   = 2024012500;        // The current plugin version (Date: YYYYMMDDXX).
 $plugin->requires  = 2022041200;        // Requires this Moodle version.
 $plugin->component = 'auth_external';      // Full name of the plugin (used for diagnostics).

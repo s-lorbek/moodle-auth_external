@@ -23,8 +23,7 @@
  * @package    auth_external
  */
 
-function auth_external_before_http_headers()
-{
+function auth_external_before_http_headers() {
     global $PAGE;
     if (strpos($PAGE->url, "/login/signup.php")) {
         global $OUTPUT;
@@ -38,9 +37,11 @@ function auth_external_before_http_headers()
         $PAGE->requires->js_call_amd('auth_external/externallib',
             "clearSelection", array(get_string('auth_birthday_alert', 'auth_external')));
 
-        $PAGE->requires->js_call_amd('auth_external/externallib',
-            "checkUniversityAffiliation",
-            array(get_config("auth_external", "affiliation_error"),
-                get_config("auth_external", "subdomains")));
+        if (get_config("auth_external", "subdomains") != "") {
+            $PAGE->requires->js_call_amd('auth_external/externallib',
+                "checkUniversityAffiliation",
+                array(get_config("auth_external", "affiliation_error"),
+                    get_config("auth_external", "subdomains")));
+        }
     }
 }

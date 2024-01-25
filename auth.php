@@ -121,8 +121,11 @@ class auth_plugin_external extends auth_plugin_base {
 
         //BEGIN USI Generated Username
         if(\get_config("auth_external", "generated_username")) {
+            $cleanedfirstname = str_replace(' ', '', $user->firstname);
+            $cleanedlastname = str_replace(' ', '', $user->lastname);
+
             $user->username = \get_config("auth_external", "generated_prefix") .
-                strtolower($user->lastname . substr($user->firstname, 0, 3));
+                strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
             global $DB;
             $postfix = 2;
             while ($DB->record_exists("user", array("username" => $user->username))) {
@@ -177,9 +180,7 @@ class auth_plugin_external extends auth_plugin_base {
         }
         $DB->set_field("user", "confirmed", 1, array("id" => $user->id));
 
-        //if(\get_config("auth_external", "generated_username")) {
-            send_message($user->id, null, " " .  $user->username);
-        //}
+        send_message($user->id, null, " " .  $user->username);
 
         $url = new \moodle_url("/login/index.php", array());
         redirect($url, '', 5);
