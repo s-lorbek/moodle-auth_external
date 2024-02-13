@@ -22,9 +22,11 @@
  * @package auth_email
  */
 
+use core\event\user_created;
+
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/authlib.php');
+require_once($CFG->libdir . '/authlib.php');
 require_once('classes/message.php');
 
 
@@ -32,9 +34,9 @@ require_once('classes/message.php');
  * Email authentication plugin.
  */
 class auth_plugin_external extends auth_plugin_base {
-
     /**
      * Constructor.
+     * @throws dml_exception
      */
     public function __construct() {
         $this->authtype = 'external';
@@ -44,9 +46,10 @@ class auth_plugin_external extends auth_plugin_base {
     /**
      * Old syntax of class constructor. Deprecated in PHP7.
      *
+     * @throws dml_exception
      * @deprecated since Moodle 3.1
      */
-    public function auth_plugin_email() {
+    public function auth_plugin_email(): void {
         debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct();
     }
@@ -58,10 +61,11 @@ class auth_plugin_external extends auth_plugin_base {
      * @param string $username The username
      * @param string $password The password
      * @return bool Authentication success or failure.
+     * @throws dml_exception
      */
-    public function user_login ($username, $password) {
+    public function user_login($username, $password): bool {
         global $CFG, $DB;
-        if ($user = $DB->get_record('user', array('username' => $username, 'mnethostid' => $CFG->mnet_localhost_id))) {
+        if ($user = $DB->get_record('user', ['username' => $username, 'mnethostid' => $CFG->mnet_localhost_id])) {
             return validate_internal_user_password($user, $password);
         }
         return false;
@@ -72,12 +76,13 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * called when the user password is updated.
      *
-     * @param  object  $user        User table object  (with system magic quotes)
-     * @param  string  $newpassword Plaintext password (with system magic quotes)
+     * @param object $user User table object  (with system magic quotes)
+     * @param string $newpassword Plaintext password (with system magic quotes)
      * @return boolean result
      *
+     * @throws dml_exception
      */
-    public function user_update_password($user, $newpassword) {
+    public function user_update_password($user, $newpassword): bool {
         $user = get_complete_user_data('id', $user->id);
         // This will also update the stored hash to the latest algorithm
         // if the existing hash is using an out-of-date algorithm (or the
@@ -85,7 +90,7 @@ class auth_plugin_external extends auth_plugin_base {
         return update_internal_user_password($user, $newpassword);
     }
 
-    public function can_signup() {
+    public function can_signup(): bool {
         return true;
     }
 
@@ -95,8 +100,9 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @param object $user new user object
      * @param boolean $notify print notice with link and terminate
+     * @throws moodle_exception
      */
-    public function user_signup($user, $notify=true) {
+    public function user_signup($user, $notify = true): bool {
         // Standard signup, without custom confirmatinurl.
         return $this->user_signup_with_confirmation($user, $notify);
     }
@@ -109,18 +115,18 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @param object $user new user object
      * @param boolean $notify print notice with link and terminate
-     * @param string $confirmationurl user confirmation URL
+     * @param string|null $confirmationurl user confirmation URL
      * @return boolean true if everything well ok and $notify is set to true
      * @throws moodle_exception
      * @since Moodle 3.2
      */
-    public function user_signup_with_confirmation($user, $notify=true, $confirmationurl = null) {
+    public function user_signup_with_confirmation(object $user, bool $notify = true, string $confirmationurl = null): bool {
         global $CFG, $DB, $SESSION;
-        require_once($CFG->dirroot.'/user/profile/lib.php');
-        require_once($CFG->dirroot.'/user/lib.php');
+        require_once($CFG->dirroot . '/user/profile/lib.php');
+        require_once($CFG->dirroot . '/user/lib.php');
 
-        //BEGIN USI Generated Username
-        if(\get_config("auth_external", "generated_username")) {
+        // BEGIN USI Generated Username.
+        if (\get_config("auth_external", "generated_username")) {
             $cleanedfirstname = str_replace(' ', '', $user->firstname);
             $cleanedlastname = str_replace(' ', '', $user->lastname);
 
@@ -128,12 +134,12 @@ class auth_plugin_external extends auth_plugin_base {
                 strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
             global $DB;
             $postfix = 2;
-            while ($DB->record_exists("user", array("username" => $user->username))) {
+            while ($DB->record_exists("user", ["username" => $user->username])) {
                 $user->username = $user->username . $postfix;
                 $postfix++;
             }
         }
-        //END
+        // END.
 
         $plainpassword = $user->password;
         $user->password = hash_internal_user_password($user->password);
@@ -144,6 +150,8 @@ class auth_plugin_external extends auth_plugin_base {
         $user->id = user_create_user($user, false, false);
 
         user_add_password_history($user->id, $plainpassword);
+
+        profile_load_data($user);
 
         // Setting external profile fields.
         $user->profile_field_external_user = true;
@@ -159,10 +167,10 @@ class auth_plugin_external extends auth_plugin_base {
         }
 
         // Trigger event.
-        \core\event\user_created::create_from_userid($user->id)->trigger();
+        user_created::create_from_userid($user->id)->trigger();
 
         if ($this->is_email_confirmation_enabled()) {
-            if (! send_confirmation_email($user, $confirmationurl)) {
+            if (!send_confirmation_email($user, $confirmationurl)) {
                 throw new moodle_exception('auth_emailnoemail', 'auth_external');
             }
 
@@ -178,12 +186,13 @@ class auth_plugin_external extends auth_plugin_base {
                 return true;
             }
         }
-        $DB->set_field("user", "confirmed", 1, array("id" => $user->id));
+        $DB->set_field("user", "confirmed", 1, ["id" => $user->id]);
 
         send_message($user->id, null, " " .  $user->username);
 
-        $url = new \moodle_url("/login/index.php", array());
+        $url = new \moodle_url("/login/index.php", []);
         redirect($url, '', 5);
+        return 0;
     }
 
     /**
@@ -191,7 +200,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    public function can_confirm() {
+    public function can_confirm(): bool {
         return true;
     }
 
@@ -200,20 +209,19 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @param string $username
      * @param string $confirmsecret
+     * @throws dml_exception|coding_exception
      */
-    public function user_confirm($username, $confirmsecret) {
+    public function user_confirm($username, $confirmsecret): int {
         global $DB, $SESSION;
         $user = get_complete_user_data('username', $username);
 
         if (!empty($user)) {
             if ($user->auth != $this->authtype) {
                 return AUTH_CONFIRM_ERROR;
-
             } else if ($user->secret === $confirmsecret && $user->confirmed) {
                 return AUTH_CONFIRM_ALREADY;
-
             } else if ($user->secret === $confirmsecret) {   // They have provided the secret key to get in.
-                $DB->set_field("user", "confirmed", 1, array("id" => $user->id));
+                $DB->set_field("user", "confirmed", 1, ["id" => $user->id]);
 
                 if ($wantsurl = get_user_preferences('auth_email_wantsurl', false, $user)) {
                     // Ensure user gets returned to page they were trying to access before signing up.
@@ -226,9 +234,10 @@ class auth_plugin_external extends auth_plugin_base {
         } else {
             return AUTH_CONFIRM_ERROR;
         }
+        return 0;
     }
 
-    public function prevent_local_passwords() {
+    public function prevent_local_passwords(): bool {
         return false;
     }
 
@@ -237,7 +246,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    public function is_internal() {
+    public function is_internal(): bool {
         return true;
     }
 
@@ -247,7 +256,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    public function can_change_password() {
+    public function can_change_password(): bool {
         return true;
     }
 
@@ -257,8 +266,8 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return moodle_url
      */
-    public function change_password_url() {
-        return null; // use default internal method.
+    public function change_password_url(): ?moodle_url {
+        return null; // Use default internal method.
     }
 
     /**
@@ -266,7 +275,7 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    public function can_reset_password() {
+    public function can_reset_password(): bool {
         return true;
     }
 
@@ -275,18 +284,22 @@ class auth_plugin_external extends auth_plugin_base {
      *
      * @return bool
      */
-    public function can_be_manually_set() {
+    public function can_be_manually_set(): bool {
         return true;
     }
 
     /**
      * Returns whether or not the captcha element is enabled.
      * @return bool
+     * @throws dml_exception
      */
-    public function is_captcha_enabled() {
+    public function is_captcha_enabled(): bool {
         return get_config("auth_{$this->authtype}", 'recaptcha');
     }
 
+    /**
+     * @throws dml_exception
+     */
     public function is_email_confirmation_enabled() {
         return get_config("auth_{$this->authtype}", 'email_confirm');
     }
@@ -294,8 +307,13 @@ class auth_plugin_external extends auth_plugin_base {
     public function signup_form() {
         global $CFG;
 
-        require_once($CFG->dirroot.'/auth/external/signup_form.php');
-        return new login_signup_form(null, null, 'post', '',
-            array('autocomplete'=>'on'));
+        require_once($CFG->dirroot . '/auth/external/signup_form.php');
+        return new login_signup_form(
+            null,
+            null,
+            'post',
+            '',
+            ['autocomplete' => 'on']
+        );
     }
 }

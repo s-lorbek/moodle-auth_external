@@ -25,18 +25,18 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->libdir.'/formslib.php');
-require_once($CFG->dirroot.'/user/profile/lib.php');
+require_once($CFG->libdir . '/formslib.php');
+require_once($CFG->dirroot . '/user/profile/lib.php');
 require_once($CFG->dirroot . '/user/editlib.php');
 require_once('lib.php');
 
 class login_signup_form extends moodleform implements renderable, templatable {
     function definition() {
-        global $USER, $CFG;
+        global $CFG;
 
         $mform = $this->_form;
 
-        if(!\get_config("auth_external", "generated_username")) {
+        if (!\get_config("auth_external", "generated_username")) {
             $mform->addElement('text', 'username', get_string('username'), 'maxlength="100" size="12" autocapitalize="none"');
             $mform->setType('username', PARAM_RAW);
             $mform->addRule('username', get_string('missingusername'), 'required', null, 'client');
@@ -52,13 +52,13 @@ class login_signup_form extends moodleform implements renderable, templatable {
         $mform->addRule('email2', get_string('missingemail'), 'required', null, 'client');
         $mform->setForceLtr('email2');
 
-        if (!empty($CFG->passwordpolicy)){
+        if (!empty($CFG->passwordpolicy)) {
             $mform->addElement('static', 'passwordpolicyinfo', '', print_password_policy());
         }
         $mform->addElement('password', 'password', get_string('password'), [
             'maxlength' => 32,
             'size' => 12,
-            'autocomplete' => 'new-password'
+            'autocomplete' => 'new-password',
         ]);
         $mform->setType('password', core_user::get_property_type('password'));
         $mform->addRule('password', get_string('missingpassword'), 'required', null, 'client');
@@ -81,13 +81,13 @@ class login_signup_form extends moodleform implements renderable, templatable {
         }
 
         $country = get_string_manager()->get_list_of_countries();
-        $default_country[''] = get_string('selectacountry');
-        $country = array_merge($default_country, $country);
+        $defaultcountry[''] = get_string('selectacountry');
+        $country = array_merge($defaultcountry, $country);
         $mform->addElement('select', 'country', get_string('country'), $country);
 
-        if( !empty($CFG->country) ){
+        if (!empty($CFG->country)) {
             $mform->setDefault('country', $CFG->country);
-        }else{
+        } else {
             $mform->setDefault('country', '');
         }
 
@@ -107,13 +107,12 @@ class login_signup_form extends moodleform implements renderable, templatable {
         $manager = new \core_privacy\local\sitepolicy\manager();
         $manager->signup_form($mform);
 
-        // buttons
+        // Add Buttons.
         $this->set_display_vertical();
         $this->add_action_buttons(true, get_string('createaccount'));
-
     }
 
-    function definition_after_data(){
+    function definition_after_data() {
         $mform = $this->_form;
 
         // Trim required name fields.
@@ -129,8 +128,9 @@ class login_signup_form extends moodleform implements renderable, templatable {
      * @param array $files array of uploaded files "element_name"=>tmp_file_path
      * @return array of "element_name"=>"error_description" if there are errors,
      *         or an empty array if everything is OK (true allowed for backwards compatibility too).
+     * @throws dml_exception
      */
-    public function validation($data, $files) {
+    public function validation($data, $files): array {
         $errors = parent::validation($data, $files);
 
         // Extend validation for any form extensions from plugins.
@@ -148,21 +148,21 @@ class login_signup_form extends moodleform implements renderable, templatable {
             }
         }
 
-        //BEGIN USI Generated username
-        if(\get_config("auth_external", "generated_username")) {
+        // BEGIN USI Generated username.
+        if (\get_config("auth_external", "generated_username")) {
             $cleanedfirstname = str_replace(' ', '', $data['firstname']);
-            $cleanedlastname = str_replace(' ', '', $data['lastname'] );
+            $cleanedlastname = str_replace(' ', '', $data['lastname']);
 
             $data["username"] = \get_config("auth_external", "auth_username_prefix") .
                 strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
             global $DB;
             $postfix = 2;
-            while ($DB->record_exists("user", array("username" => $data["username"]))) {
+            while ($DB->record_exists("user", ["username" => $data["username"]])) {
                 $data["username"] = $data["username"] . $postfix;
                 $postfix++;
             }
         }
-        //END
+        // END.
         $errors += signup_validate_data($data, $files);
 
         return $errors;
@@ -174,13 +174,13 @@ class login_signup_form extends moodleform implements renderable, templatable {
      * @param renderer_base $output Used to do a final render of any components that need to be rendered for export.
      * @return array
      */
-    public function export_for_template(renderer_base $output) {
+    public function export_for_template(renderer_base $output): array {
         ob_start();
         $this->display();
         $formhtml = ob_get_contents();
         ob_end_clean();
         $context = [
-            'formhtml' => $formhtml
+            'formhtml' => $formhtml,
         ];
         return $context;
     }

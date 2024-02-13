@@ -14,16 +14,38 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
- * Version details
+ * Collection of observer callback functions and handler
  *
  * @package    auth_external
- * @copyright  2024 Stephan Lorbek <stephan.lorbek@uni-graz.at>
+ * @author     Stephan Lorbek
+ * @copyright  2024 Stephan Lorbek
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+namespace auth_external;
 
-$plugin->version   = 2024021300;        // The current plugin version (Date: YYYYMMDDXX).
-$plugin->requires  = 2022041200;        // Requires this Moodle version.
-$plugin->component = 'auth_external';      // Full name of the plugin (used for diagnostics).
+use core\event\base;
+use dml_exception;
+
+class observer {
+    /**
+     * @throws dml_exception
+     */
+    public static function user_update_external_fields(base $event): void {
+        global $DB;
+        $userid = $event->relateduserid;
+        $user = $DB->get_record("user", ['id' => $userid]);
+
+        if ($user->auth == "external") {
+            profile_load_data($user);
+            $user->profile_field_external_user = true;
+            $user->profile_field_external_user_verified = 0;
+            $user->profile_field_external_user_pending = false;
+            profile_save_data($user);
+        }
+    }
+}
+
+
