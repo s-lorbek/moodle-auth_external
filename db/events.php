@@ -30,8 +30,4 @@ $observers = [
         'eventname' => '\core\event\user_created',
         'callback' => '\auth_external\observer::user_update_external_fields',
     ],
-    [
-        'eventname' => '\core\event\user_updated',
-        'callback' => '\auth_external\observer::user_update_external_fields',
-    ],
 ];
