@@ -25,8 +25,11 @@
 require_once(dirname(__FILE__) . '/../../../config.php');
 
 // Load Moodle's message API
-require_once($CFG->dirroot.'/message/lib.php');
+require_once($CFG->dirroot . '/message/lib.php');
 
+/**
+ * @throws dml_exception
+ */
 function send_message($recipientid, $senderid, $comment) {
     /*global $DB;
 
@@ -34,9 +37,9 @@ function send_message($recipientid, $senderid, $comment) {
     $messageid = message_post_message($senderid, $recipient, $comment, 0);
     return $messageid;*/
 
-    global $DB, $USER, $CFG;
-    $recipient = $DB->get_record('user', array("id" => $recipientid));
-    $noreply = new \stdClass();
+    global $DB, $CFG;
+    $recipient = $DB->get_record('user', ["id" => $recipientid]);
+    $noreply = new stdClass();
     $noreply->firstname = $CFG->supportname;
     $noreply->lastname = '';
     $noreply->username = 'usiadmin';
@@ -55,7 +58,15 @@ function send_message($recipientid, $senderid, $comment) {
     $content = str_replace("{{lastname}}", $recipient->lastname, $content);
 
 
-    $messageid = email_to_user($recipient, $noreply, $subject,
-        html_to_text($content), $content, '', '', false);
+    $messageid = email_to_user(
+        $recipient,
+        core_user::get_noreply_user(),
+        $subject,
+        html_to_text($content),
+        $content,
+        '',
+        '',
+        false
+    );
     return $messageid;
 }

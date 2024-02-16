@@ -149,11 +149,11 @@ class login_signup_form extends moodleform implements renderable, templatable {
         }
 
         // BEGIN USI Generated username.
-        if (\get_config("auth_external", "generated_username")) {
+        if (get_config("auth_external", "generated_username")) {
             $cleanedfirstname = str_replace(' ', '', $data['firstname']);
             $cleanedlastname = str_replace(' ', '', $data['lastname']);
 
-            $data["username"] = \get_config("auth_external", "auth_username_prefix") .
+            $data["username"] = get_config("auth_external", "auth_username_prefix") .
                 strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
             global $DB;
             $postfix = 2;

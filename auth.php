@@ -49,7 +49,7 @@ class auth_plugin_external extends auth_plugin_base {
      * @throws dml_exception
      * @deprecated since Moodle 3.1
      */
-    public function auth_plugin_email(): void {
+    public function auth_plugin_external(): void {
         debugging('Use of class name as constructor is deprecated', DEBUG_DEVELOPER);
         self::__construct();
     }
@@ -150,8 +150,9 @@ class auth_plugin_external extends auth_plugin_base {
         $user->id = user_create_user($user, false, false);
 
         user_add_password_history($user->id, $plainpassword);
+        profile_save_data($user);
 
-        profile_load_data($user);
+        profile_load_custom_fields($user);
 
         // Setting external profile fields.
         $user->profile_field_external_user = true;
@@ -192,7 +193,7 @@ class auth_plugin_external extends auth_plugin_base {
 
         $url = new \moodle_url("/login/index.php", []);
         redirect($url, '', 5);
-        return 0;
+        return true;
     }
 
     /**
