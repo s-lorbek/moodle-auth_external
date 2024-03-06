@@ -41,7 +41,7 @@ class observer {
         if ($user->auth == "external") {
             profile_load_data($user);
             $user->profile_field_external_user = true;
-            $user->profile_field_external_user_verified = 0;
+            $user->profile_field_external_user_verified = true;
             $user->profile_field_external_user_pending = false;
             profile_save_data($user);
         }
