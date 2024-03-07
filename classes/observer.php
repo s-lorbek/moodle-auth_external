@@ -38,7 +38,7 @@ class observer {
         $userid = $event->relateduserid;
         $user = $DB->get_record("user", ['id' => $userid]);
 
-        if ($user->auth == "external") {
+        if ($user->auth == "external" && $event->userid != 0) {
             profile_load_data($user);
             $user->profile_field_external_user = true;
             $user->profile_field_external_user_verified = true;
@@ -47,5 +47,3 @@ class observer {
         }
     }
 }
-
-
