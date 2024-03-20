@@ -127,8 +127,16 @@ class auth_plugin_external extends auth_plugin_base {
 
         // BEGIN USI Generated Username.
         if (\get_config("auth_external", "generated_username")) {
-            $cleanedfirstname = str_replace(' ', '', $user->firstname);
-            $cleanedlastname = str_replace(' ', '', $user->lastname);
+            $cleanedfirstname = iconv(
+                "utf-8",
+                "ascii//TRANSLIT",
+                str_replace(' ', '', $user->firstname)
+            );
+            $cleanedlastname = iconv(
+                "utf-8",
+                "ascii//TRANSLIT",
+                str_replace(' ', '', $user->lastname)
+            );
 
             $user->username = \get_config("auth_external", "generated_prefix") .
                 strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
