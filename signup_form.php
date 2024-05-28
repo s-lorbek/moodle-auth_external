@@ -172,7 +172,6 @@ class login_signup_form extends moodleform implements renderable, templatable {
         }
         // END.
         $errors += signup_validate_data($data, $files);
-
         return $errors;
     }
 

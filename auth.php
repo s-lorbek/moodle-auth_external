@@ -159,7 +159,6 @@ class auth_plugin_external extends auth_plugin_base {
 
         user_add_password_history($user->id, $plainpassword);
         profile_save_data($user);
-
         profile_load_custom_fields($user);
 
         // Setting external profile fields.

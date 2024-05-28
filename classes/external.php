@@ -41,7 +41,6 @@ require_once($CFG->dirroot . '/user/profile/lib.php');
  * @since      Moodle 3.2
  */
 class auth_external_external extends external_api {
-
     /**
      * Check if registration is enabled in this site.
      *
@@ -63,7 +62,7 @@ class auth_external_external extends external_api {
      * @since Moodle 3.2
      */
     public static function get_signup_settings_parameters() {
-        return new external_function_parameters(array());
+        return new external_function_parameters([]);
     }
 
     /**
@@ -82,7 +81,7 @@ class auth_external_external extends external_api {
 
         self::check_signup_enabled();
 
-        $result = array();
+        $result = [];
         $result['namefields'] = useredit_get_required_name_fields();
 
         if (!empty($CFG->passwordpolicy)) {
@@ -103,12 +102,12 @@ class auth_external_external extends external_api {
         }
 
         if ($fields = profile_get_signup_fields()) {
-            $result['profilefields'] = array();
+            $result['profilefields'] = [];
             foreach ($fields as $field) {
                 $fielddata = $field->object->get_field_config_for_external();
                 $fielddata['categoryname'] = external_format_string($field->categoryname, $context->id);
                 $fielddata['name'] = external_format_string($fielddata['name'], $context->id);
-                list($fielddata['defaultdata'], $fielddata['defaultdataformat']) =
+                [$fielddata['defaultdata'], $fielddata['defaultdataformat']] =
                     external_format_text($fielddata['defaultdata'], $fielddata['defaultdataformat'], $context->id);
 
                 $result['profilefields'][] = $fielddata;
@@ -120,7 +119,7 @@ class auth_external_external extends external_api {
             $result['recaptchapublickey'] = $CFG->recaptchapublickey;
         }
 
-        $result['warnings'] = array();
+        $result['warnings'] = [];
         return $result;
     }
 
@@ -133,9 +132,9 @@ class auth_external_external extends external_api {
     public static function get_signup_settings_returns() {
 
         return new external_single_structure(
-            array(
+            [
                 'namefields' => new external_multiple_structure(
-                     new external_value(PARAM_NOTAGS, 'The order of the name fields')
+                    new external_value(PARAM_NOTAGS, 'The order of the name fields')
                 ),
                 'passwordpolicy' => new external_value(PARAM_RAW, 'Password policy', VALUE_OPTIONAL),
                 'sitepolicy' => new external_value(PARAM_RAW, 'Site policy', VALUE_OPTIONAL),
@@ -144,7 +143,7 @@ class auth_external_external extends external_api {
                 'country' => new external_value(PARAM_ALPHA, 'Default country', VALUE_OPTIONAL),
                 'profilefields' => new external_multiple_structure(
                     new external_single_structure(
-                        array(
+                        [
                             'id' => new external_value(PARAM_INT, 'Profile field id', VALUE_OPTIONAL),
                             'shortname' => new external_value(PARAM_ALPHANUMEXT, 'Profile field shortname', VALUE_OPTIONAL),
                             'name' => new external_value(PARAM_RAW, 'Profield field name', VALUE_OPTIONAL),
@@ -166,15 +165,17 @@ class auth_external_external extends external_api {
                             'param3' => new external_value(PARAM_RAW, 'Profield field settings', VALUE_OPTIONAL),
                             'param4' => new external_value(PARAM_RAW, 'Profield field settings', VALUE_OPTIONAL),
                             'param5' => new external_value(PARAM_RAW, 'Profield field settings', VALUE_OPTIONAL),
-                        )
-                    ), 'Required profile fields', VALUE_OPTIONAL
+                        ]
+                    ),
+                    'Required profile fields',
+                    VALUE_OPTIONAL
                 ),
                 'recaptchapublickey' => new external_value(PARAM_RAW, 'Recaptcha public key', VALUE_OPTIONAL),
                 'recaptchachallengehash' => new external_value(PARAM_RAW, 'Recaptcha challenge hash', VALUE_OPTIONAL),
                 'recaptchachallengeimage' => new external_value(PARAM_URL, 'Recaptcha challenge noscript image', VALUE_OPTIONAL),
                 'recaptchachallengejs' => new external_value(PARAM_URL, 'Recaptcha challenge js url', VALUE_OPTIONAL),
                 'warnings'  => new external_warnings(),
-            )
+            ]
         );
     }
 
@@ -186,7 +187,7 @@ class auth_external_external extends external_api {
      */
     public static function signup_user_parameters() {
         return new external_function_parameters(
-            array(
+            [
                 'username' => new external_value(core_user::get_property_type('username'), 'Username'),
                 'password' => new external_value(core_user::get_property_type('password'), 'Plain text password'),
                 'firstname' => new external_value(core_user::get_property_type('firstname'), 'The first name(s) of the user'),
@@ -198,16 +199,23 @@ class auth_external_external extends external_api {
                 'recaptcharesponse' => new external_value(PARAM_NOTAGS, 'Recaptcha response', VALUE_DEFAULT, ''),
                 'customprofilefields' => new external_multiple_structure(
                     new external_single_structure(
-                        array(
+                        [
                             'type'  => new external_value(PARAM_ALPHANUMEXT, 'The type of the custom field'),
                             'name'  => new external_value(PARAM_ALPHANUMEXT, 'The name of the custom field'),
-                            'value' => new external_value(PARAM_RAW, 'Custom field value, can be an encoded json if required')
-                        )
-                    ), 'User custom fields (also known as user profile fields)', VALUE_DEFAULT, array()
+                            'value' => new external_value(PARAM_RAW, 'Custom field value, can be an encoded json if required'),
+                        ]
+                    ),
+                    'User custom fields (also known as user profile fields)',
+                    VALUE_DEFAULT,
+                    []
                 ),
-                'redirect' => new external_value(PARAM_LOCALURL, 'Redirect the user to this site url after confirmation.',
-                                                    VALUE_DEFAULT, ''),
-            )
+                'redirect' => new external_value(
+                    PARAM_LOCALURL,
+                    'Redirect the user to this site url after confirmation.',
+                    VALUE_DEFAULT,
+                    ''
+                ),
+            ]
         );
     }
 
@@ -230,15 +238,25 @@ class auth_external_external extends external_api {
      * @throws moodle_exception
      * @throws invalid_parameter_exception
      */
-    public static function signup_user($username, $password, $firstname, $lastname, $email, $city = '', $country = '',
-                                        $recaptchachallengehash = '', $recaptcharesponse = '', $customprofilefields = array(),
-                                        $redirect = '') {
+    public static function signup_user(
+        $username,
+        $password,
+        $firstname,
+        $lastname,
+        $email,
+        $city = '',
+        $country = '',
+        $recaptchachallengehash = '',
+        $recaptcharesponse = '',
+        $customprofilefields = [],
+        $redirect = ''
+    ) {
         global $CFG, $PAGE;
 
-        $warnings = array();
+        $warnings = [];
         $params = self::validate_parameters(
             self::signup_user_parameters(),
-            array(
+            [
                 'username' => $username,
                 'password' => $password,
                 'firstname' => $firstname,
@@ -250,7 +268,7 @@ class auth_external_external extends external_api {
                 'recaptcharesponse' => $recaptcharesponse,
                 'customprofilefields' => $customprofilefields,
                 'redirect' => $redirect,
-            )
+            ]
         );
 
         // We need this to make work the format text functions.
@@ -261,8 +279,8 @@ class auth_external_external extends external_api {
 
         // Validate profile fields param types.
         $allowedfields = profile_get_signup_fields();
-        $fieldproperties = array();
-        $fieldsrequired = array();
+        $fieldproperties = [];
+        $fieldsrequired = [];
         foreach ($allowedfields as $field) {
             $fieldproperties[$field->object->inputname] = $field->object->get_field_properties();
             if ($field->object->is_required()) {
@@ -274,7 +292,7 @@ class auth_external_external extends external_api {
             if (!array_key_exists($profilefield['name'], $fieldproperties)) {
                 throw new invalid_parameter_exception('Invalid field' . $profilefield['name']);
             }
-            list($type, $allownull) = $fieldproperties[$profilefield['name']];
+            [$type, $allownull] = $fieldproperties[$profilefield['name']];
             validate_param($profilefield['value'], $type, $allownull);
             // Remove from the potential required list.
             if (isset($fieldsrequired[$profilefield['name']])) {
@@ -306,13 +324,17 @@ class auth_external_external extends external_api {
             }
         }
 
-        $errors = signup_validate_data($data, array());
+        $errors = signup_validate_data($data, []);
 
         // Validate recaptcha.
         if (signup_captcha_enabled()) {
             require_once($CFG->libdir . '/recaptchalib_v2.php');
-            $response = recaptcha_check_response(RECAPTCHA_VERIFY_URL, $CFG->recaptchaprivatekey,
-                                                 getremoteaddr(), $params['recaptcharesponse']);
+            $response = recaptcha_check_response(
+                RECAPTCHA_VERIFY_URL,
+                $CFG->recaptchaprivatekey,
+                getremoteaddr(),
+                $params['recaptcharesponse']
+            );
             if (!$response['isvalid']) {
                 $errors['recaptcharesponse'] = $response['error'];
             }
@@ -320,17 +342,17 @@ class auth_external_external extends external_api {
 
         if (!empty($errors)) {
             foreach ($errors as $itemname => $message) {
-                $warnings[] = array(
+                $warnings[] = [
                     'item' => $itemname,
                     'itemid' => 0,
                     'warningcode' => 'fielderror',
-                    'message' => s($message)
-                );
+                    'message' => s($message),
+                ];
             }
-            $result = array(
+            $result = [
                 'success' => false,
                 'warnings' => $warnings,
-            );
+            ];
         } else {
             // Save the user.
             $user = signup_setup_new_user((object) $data);
@@ -343,14 +365,14 @@ class auth_external_external extends external_api {
                 // Pass via moodle_url to fix thinks like admin links.
                 $redirect = new moodle_url($params['redirect']);
 
-                $confirmationurl = new moodle_url('/login/confirm.php', array('redirect' => $redirect->out()));
+                $confirmationurl = new moodle_url('/login/confirm.php', ['redirect' => $redirect->out()]);
             }
             $authplugin->user_signup_with_confirmation($user, false, $confirmationurl);
 
-            $result = array(
+            $result = [
                 'success' => true,
-                'warnings' => array(),
-            );
+                'warnings' => [],
+            ];
         }
         return $result;
     }
@@ -364,10 +386,10 @@ class auth_external_external extends external_api {
     public static function signup_user_returns() {
 
         return new external_single_structure(
-            array(
+            [
                 'success' => new external_value(PARAM_BOOL, 'True if the user was created false otherwise'),
                 'warnings'  => new external_warnings(),
-            )
+            ]
         );
     }
 }
