@@ -23,33 +23,3 @@
  * @package    auth_external
  */
 
-function auth_external_before_http_headers() {
-    global $PAGE;
-    if (strpos($PAGE->url, "/login/signup.php")) {
-        global $OUTPUT;
-        $passwordfieldstrings = ['label' => get_string('auth_label', 'auth_external'),
-            'auth_hint' => get_string('auth_hint', 'auth_external')];
-        $additionalpasswordfield = $OUTPUT->render_from_template("auth_external/passfield", $passwordfieldstrings);
-        $PAGE->requires->js_call_amd(
-            'auth_external/externallib',
-            "addPasswordCheck",
-            [$additionalpasswordfield,
-            get_string('auth_password_alert', 'auth_external')]
-        );
-
-        $PAGE->requires->js_call_amd(
-            'auth_external/externallib',
-            "clearSelection",
-            [get_string('auth_birthday_alert', 'auth_external')]
-        );
-
-        if (get_config("auth_external", "subdomains") != "") {
-            $PAGE->requires->js_call_amd(
-                'auth_external/externallib',
-                "checkUniversityAffiliation",
-                [get_config("auth_external", "affiliation_error"),
-                get_config("auth_external", "subdomains")]
-            );
-        }
-    }
-}
