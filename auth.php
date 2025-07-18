@@ -120,7 +120,7 @@ class auth_plugin_external extends auth_plugin_base {
      * @throws moodle_exception
      * @since Moodle 3.2
      */
-    public function user_signup_with_confirmation(object $user, bool $notify = true, string $confirmationurl = null): bool {
+    public function user_signup_with_confirmation(object $user, bool $notify = true, $confirmationurl = null): bool {
         global $CFG, $DB, $SESSION;
         require_once($CFG->dirroot . '/user/profile/lib.php');
         require_once($CFG->dirroot . '/user/lib.php');
@@ -171,7 +171,7 @@ class auth_plugin_external extends auth_plugin_base {
 
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
-            set_user_preference('auth_external_wantsurl', $SESSION->wantsurl, $user);
+            set_user_preference('auth_external_wantsurl', $SESSION->wantsurl->out(), $user);
         }
 
         // Trigger event.
@@ -200,6 +200,7 @@ class auth_plugin_external extends auth_plugin_base {
 
         $url = new \moodle_url("/login/index.php", []);
         redirect($url, '', 5);
+
         return true;
     }
 
