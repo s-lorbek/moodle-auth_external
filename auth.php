@@ -171,7 +171,7 @@ class auth_plugin_external extends auth_plugin_base {
 
         // Save wantsurl against user's profile, so we can return them there upon confirmation.
         if (!empty($SESSION->wantsurl)) {
-            set_user_preference('auth_external_wantsurl', $SESSION->wantsurl->out(), $user);
+            set_user_preference('auth_external_wantsurl', $SESSION->wantsurl, $user);
         }
 
         // Trigger event.
