@@ -19,7 +19,7 @@
  *
  * @author Martin Dougiamas
  * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package auth_email
+ * @package auth_external
  */
 
 use core\event\user_created;
@@ -66,6 +66,10 @@ class auth_plugin_external extends auth_plugin_base {
     public function user_login($username, $password): bool {
         global $CFG, $DB;
         if ($user = $DB->get_record('user', ['username' => $username, 'mnethostid' => $CFG->mnet_localhost_id])) {
+            $lastpasswordupdatetime = get_user_preferences('auth_external_passwordupdatetime', null, $user->id);
+            if ($lastpasswordupdatetime === null) {
+                set_user_preference('auth_external_passwordupdatetime', $user->timecreated, $user->id);
+            }
             return validate_internal_user_password($user, $password);
         }
         return false;
@@ -84,6 +88,7 @@ class auth_plugin_external extends auth_plugin_base {
      */
     public function user_update_password($user, $newpassword): bool {
         $user = get_complete_user_data('id', $user->id);
+        set_user_preference('auth_external_passwordupdatetime', time(), $user->id);
         // This will also update the stored hash to the latest algorithm
         // if the existing hash is using an out-of-date algorithm (or the
         // legacy md5 algorithm).
@@ -92,6 +97,34 @@ class auth_plugin_external extends auth_plugin_base {
 
     public function can_signup(): bool {
         return true;
+    }
+
+    /**
+     * Return number of days to user password expires.
+     *
+     * If user password does not expire, it should return 0 or a positive value.
+     * If user password is already expired, it should return negative value.
+     *
+     * @param mixed $username username (with system magic quotes)
+     * @return integer
+     */
+    public function password_expire($username) {
+        $result = 0;
+
+        if ($this->config->expiration) {
+            $user = core_user::get_user_by_username($username, 'id,timecreated');
+            $lastpasswordupdatetime = get_user_preferences('auth_external_passwordupdatetime', $user->timecreated, $user->id);
+            $expiretime = $lastpasswordupdatetime + $this->config->expirationtime * DAYSECS;
+            $now = time();
+            $result = ($expiretime - $now) / DAYSECS;
+            if ($expiretime > $now) {
+                $result = ceil($result);
+            } else {
+                $result = floor($result);
+            }
+        }
+
+        return $result;
     }
 
     /**
@@ -140,10 +173,10 @@ class auth_plugin_external extends auth_plugin_base {
 
             $user->username = \get_config("auth_external", "generated_prefix") .
                 strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
-            global $DB;
+            $baseusername = $user->username;
             $postfix = 2;
             while ($DB->record_exists("user", ["username" => $user->username])) {
-                $user->username = $user->username . $postfix;
+                $user->username = $baseusername . $postfix;
                 $postfix++;
             }
         }
@@ -158,7 +191,8 @@ class auth_plugin_external extends auth_plugin_base {
         $user->id = user_create_user($user, false, false);
 
         user_add_password_history($user->id, $plainpassword);
-        profile_save_data($user);
+        set_user_preference('auth_external_passwordupdatetime', time(), $user->id);
+
         profile_load_custom_fields($user);
 
         // Setting external profile fields.
@@ -232,10 +266,10 @@ class auth_plugin_external extends auth_plugin_base {
             } else if ($user->secret === $confirmsecret) {   // They have provided the secret key to get in.
                 $DB->set_field("user", "confirmed", 1, ["id" => $user->id]);
 
-                if ($wantsurl = get_user_preferences('auth_email_wantsurl', false, $user)) {
+                if ($wantsurl = get_user_preferences('auth_external_wantsurl', false, $user)) {
                     // Ensure user gets returned to page they were trying to access before signing up.
                     $SESSION->wantsurl = $wantsurl;
-                    unset_user_preference('auth_email_wantsurl', $user);
+                    unset_user_preference('auth_external_wantsurl', $user);
                 }
 
                 return AUTH_CONFIRM_OK;

@@ -85,4 +85,30 @@ class behat_auth_external extends behat_base implements \Behat\Behat\Context\Con
         }
         throw new PendingException();
     }
+
+    /**
+     * Sets a user preference for a specific user.
+     *
+     * @Given /^the user "(?P<username_string>(?:[^"]|\\")*)" has the following preferences:$/
+     * @param string $username
+     * @param TableNode $table
+     */
+    public function the_user_has_the_following_preferences($username, TableNode $table) {
+        global $DB;
+
+        $user = $DB->get_record('user', ['username' => $username], 'id', MUST_EXIST);
+        $rows = $table->getRows();
+
+        foreach ($rows as $row) {
+            $name = $row[0];
+            $value = $row[1];
+
+            // If the value is a negative number, treat it as a relative timestamp from now.
+            if (is_numeric($value) && $value < 0) {
+                $value = time() + (int)$value;
+            }
+
+            set_user_preference($name, $value, $user->id);
+        }
+    }
 }

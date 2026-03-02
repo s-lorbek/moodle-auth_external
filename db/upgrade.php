@@ -17,7 +17,7 @@
 /**
  * No authentication plugin upgrade code
  *
- * @package    auth_email
+ * @package    auth_external
  * @copyright  2017 Stephen Bourget
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -46,6 +46,26 @@ function xmldb_auth_external_upgrade($oldversion) {
 
     // Automatically generated Moodle v4.0.0 release upgrade line.
     // Put any upgrade step following this.
+
+    if ($oldversion < 2026021600) {
+        $sql = "SELECT u.id, u.timecreated
+                  FROM {user} u
+             LEFT JOIN {user_preferences} up ON (u.id = up.userid AND up.name = :prefname)
+                 WHERE u.auth = :auth
+                   AND u.deleted = 0
+                   AND up.id IS NULL";
+
+        $params = [
+            'prefname' => 'auth_external_passwordupdatetime',
+            'auth'     => 'external',
+        ];
+        $users = $DB->get_recordset_sql($sql, $params);
+        foreach ($users as $user) {
+            set_user_preference('auth_external_passwordupdatetime', $user->timecreated, $user->id);
+        }
+        $users->close();
+        upgrade_plugin_savepoint(true, 2026021600, 'auth', 'external');
+    }
 
     return true;
 }
