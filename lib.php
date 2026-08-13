@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  *
  * @throws coding_exception
@@ -22,4 +21,3 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @package    auth_external
  */
-

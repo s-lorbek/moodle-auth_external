@@ -15,11 +15,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Authentication Plugin: Email Authentication
+ * Authentication Plugin: External Authentication
  *
- * @author Martin Dougiamas
- * @license http://www.gnu.org/copyleft/gpl.html GNU Public License
- * @package auth_external
+ * @package    auth_external
+ * @copyright  2026 Stephan Lorbek <stephan.lorbek@uni-graz.at>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 use core\event\user_created;
@@ -95,6 +95,11 @@ class auth_plugin_external extends auth_plugin_base {
         return update_internal_user_password($user, $newpassword);
     }
 
+    /**
+     * Check if registration is enabled for the plugin.
+     *
+     * @return bool True if signup is allowed.
+     */
     public function can_signup(): bool {
         return true;
     }
@@ -125,6 +130,37 @@ class auth_plugin_external extends auth_plugin_base {
         }
 
         return $result;
+    }
+
+    /**
+     * Generate a unique username from the user's names using the configured prefix.
+     *
+     * Names are transliterated to ASCII and lowercased with all whitespace removed. The
+     * username is built as "{prefix}{lastname}{first 3 chars of firstname}". If the
+     * generated username is already taken, a numeric postfix is appended (starting at 2)
+     * until a free username is found.
+     *
+     * @param string $firstname
+     * @param string $lastname
+     * @return string
+     */
+    public function generate_username(string $firstname, string $lastname): string {
+        global $DB;
+
+        $cleanedfirstname = (string) iconv('utf-8', 'ascii//TRANSLIT', str_replace(' ', '', $firstname));
+        $cleanedlastname  = (string) iconv('utf-8', 'ascii//TRANSLIT', str_replace(' ', '', $lastname));
+
+        $baseusername = get_config('auth_external', 'generated_prefix') .
+            strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
+
+        $username = $baseusername;
+        $postfix = 2;
+        while ($DB->record_exists('user', ['username' => $username])) {
+            $username = $baseusername . $postfix;
+            $postfix++;
+        }
+
+        return $username;
     }
 
     /**
@@ -160,25 +196,7 @@ class auth_plugin_external extends auth_plugin_base {
 
         // BEGIN USI Generated Username.
         if (\get_config("auth_external", "generated_username")) {
-            $cleanedfirstname = iconv(
-                "utf-8",
-                "ascii//TRANSLIT",
-                str_replace(' ', '', $user->firstname)
-            );
-            $cleanedlastname = iconv(
-                "utf-8",
-                "ascii//TRANSLIT",
-                str_replace(' ', '', $user->lastname)
-            );
-
-            $user->username = \get_config("auth_external", "generated_prefix") .
-                strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
-            $baseusername = $user->username;
-            $postfix = 2;
-            while ($DB->record_exists("user", ["username" => $user->username])) {
-                $user->username = $baseusername . $postfix;
-                $postfix++;
-            }
+            $user->username = $this->generate_username($user->firstname, $user->lastname);
         }
         // END.
 
@@ -280,6 +298,11 @@ class auth_plugin_external extends auth_plugin_base {
         return 0;
     }
 
+    /**
+     * Determine if local passwords should be prevented.
+     *
+     * @return bool True if local passwords are prohibited.
+     */
     public function prevent_local_passwords(): bool {
         return false;
     }
@@ -341,12 +364,20 @@ class auth_plugin_external extends auth_plugin_base {
     }
 
     /**
+     * Check if email confirmation is enabled for signup.
+     *
+     * @return bool True if confirmation is required.
      * @throws dml_exception
      */
     public function is_email_confirmation_enabled() {
         return get_config("auth_{$this->authtype}", 'email_confirm');
     }
 
+    /**
+     * Get the signup form object.
+     *
+     * @return login_signup_form The signup form.
+     */
     public function signup_form() {
         global $CFG;
 

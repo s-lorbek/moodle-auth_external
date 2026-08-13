@@ -23,7 +23,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Gherkin\Node\TableNode;
 
 require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
@@ -37,12 +36,18 @@ require_once(__DIR__ . '/../../../../lib/behat/behat_base.php');
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class behat_auth_external extends behat_base implements \Behat\Behat\Context\Context {
+    /** @var string The user first name. */
     private $firstname;
+    /** @var string The user last name. */
     private $lastname;
+    /** @var string The user generated username. */
     private $generatedusername;
 
     /**
+     * Fill in form fields with the given table hash values.
+     *
      * @When I fill in the following:
+     * @param TableNode $table
      */
     public function ifillinthefollowing(TableNode $table) {
         $page = $this->getSession()->getPage();
@@ -55,6 +60,8 @@ class behat_auth_external extends behat_base implements \Behat\Behat\Context\Con
     }
 
     /**
+     * Navigate to the signup form.
+     *
      * @Given /^I am on the signup form$/
      */
     public function iamonthesignupform() {
@@ -62,7 +69,10 @@ class behat_auth_external extends behat_base implements \Behat\Behat\Context\Con
     }
 
     /**
+     * Press the button with a specified ID.
+     *
      * @Given /^I press the button with id "([^"]*)"$/
+     * @param string $arg1 The button ID attribute.
      */
     public function ipressthebuttonwithid($arg1) {
         $button = $this->getSession()->getPage()->find('css', "#$arg1");
@@ -75,15 +85,19 @@ class behat_auth_external extends behat_base implements \Behat\Behat\Context\Con
 
 
     /**
+     * Assert that the generated username matches the expected value.
+     *
      * @Then /^the username should be generated correctly "([^"]*)"$/
+     * @param string $username The expected username.
      */
     public function theusernameshouldbegeneratedcorrectly($username) {
         global $DB;
-        $user = $DB->get_record("user", ["firstname" => "John", "lastname" => "Doe"]);
-        if (strcmp($user->username, $username) == 0) {
-            throw new \Exception("Username is generated wrong");
+        // The signup feature always registers with test@example.com, so the newly created
+        // user is found unambiguously by email (unlike firstname/lastname which can collide).
+        $user = $DB->get_record("user", ["email" => "test@example.com"], '*', MUST_EXIST);
+        if ($user->username !== $username) {
+            throw new \Exception("Username '{$user->username}' was generated incorrectly, expected '{$username}'");
         }
-        throw new PendingException();
     }
 
     /**

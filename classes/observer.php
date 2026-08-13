@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Collection of observer callback functions and handler
  *
@@ -29,8 +28,18 @@ namespace auth_external;
 use core\event\base;
 use dml_exception;
 
+/**
+ * Event observer for auth_external.
+ *
+ * @package    auth_external
+ * @copyright  2024 Stephan Lorbek
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class observer {
     /**
+     * Set external user profile fields when created by an actor.
+     *
+     * @param base $event The event object.
      * @throws dml_exception
      */
     public static function user_update_external_fields(base $event): void {

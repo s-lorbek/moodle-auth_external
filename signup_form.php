@@ -17,7 +17,7 @@
 /**
  * User sign-up form.
  *
- * @package    core
+ * @package    auth_external
  * @subpackage auth
  * @copyright  1999 onwards Martin Dougiamas  http://dougiamas.com
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -30,8 +30,18 @@ require_once($CFG->dirroot . '/user/profile/lib.php');
 require_once($CFG->dirroot . '/user/editlib.php');
 require_once('lib.php');
 
+/**
+ * User sign-up form class.
+ *
+ * @package    auth_external
+ * @copyright  1999 onwards Martin Dougiamas  http://dougiamas.com
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class login_signup_form extends moodleform implements renderable, templatable {
-    function definition() {
+    /**
+     * Define the form fields and rules.
+     */
+    public function definition() {
         global $CFG;
 
         $mform = $this->_form;
@@ -112,7 +122,10 @@ class login_signup_form extends moodleform implements renderable, templatable {
         $this->add_action_buttons(true, get_string('createaccount'));
     }
 
-    function definition_after_data() {
+    /**
+     * Perform post-definition modifications based on initial data.
+     */
+    public function definition_after_data() {
         $mform = $this->_form;
 
         // Trim required name fields.
@@ -150,25 +163,10 @@ class login_signup_form extends moodleform implements renderable, templatable {
 
         // BEGIN USI Generated username.
         if (get_config("auth_external", "generated_username")) {
-            $cleanedfirstname = iconv(
-                "utf-8",
-                "ascii//TRANSLIT",
-                str_replace(' ', '', $data['firstname'])
+            $data["username"] = \get_auth_plugin('external')->generate_username(
+                $data['firstname'] ?? '',
+                $data['lastname'] ?? ''
             );
-            $cleanedlastname = iconv(
-                "utf-8",
-                "ascii//TRANSLIT",
-                str_replace(' ', '', $data['lastname'])
-            );
-
-            $data["username"] = get_config("auth_external", "auth_username_prefix") .
-                strtolower($cleanedlastname . substr($cleanedfirstname, 0, 3));
-            global $DB;
-            $postfix = 2;
-            while ($DB->record_exists("user", ["username" => $data["username"]])) {
-                $data["username"] = $data["username"] . $postfix;
-                $postfix++;
-            }
         }
         // END.
         $errors += signup_validate_data($data, $files);

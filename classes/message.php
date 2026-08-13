@@ -16,27 +16,21 @@
 
 /**
  *
- * @package   auth_external_users
+ * @package   auth_external
  * @copyright 2023 Stephan Lorbek
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-// Load Moodle's configuration settings
-require_once(dirname(__FILE__) . '/../../../config.php');
-
-// Load Moodle's message API
-require_once($CFG->dirroot . '/message/lib.php');
-
 /**
+ * Send email notification to user.
+ *
+ * @param int $recipientid
+ * @param int $senderid
+ * @param string $comment
+ * @return int|bool
  * @throws dml_exception
  */
 function send_message($recipientid, $senderid, $comment) {
-    /*global $DB;
-
-    $recipient = $DB->get_record('user', array("id" => $recipientid));
-    $messageid = message_post_message($senderid, $recipient, $comment, 0);
-    return $messageid;*/
-
     global $DB, $CFG;
     $recipient = $DB->get_record('user', ["id" => $recipientid]);
     $noreply = new stdClass();
@@ -56,7 +50,6 @@ function send_message($recipientid, $senderid, $comment) {
     $content = str_replace("{{username}}", $recipient->username, $content);
     $content = str_replace("{{firstname}}", $recipient->firstname, $content);
     $content = str_replace("{{lastname}}", $recipient->lastname, $content);
-
 
     $messageid = email_to_user(
         $recipient,

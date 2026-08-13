@@ -17,7 +17,7 @@
 /**
  * Auth e-mail external API
  *
- * @package    auth_email
+ * @package    auth_external
  * @category   external
  * @copyright  2016 Juan Leyva <juan@moodle.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -26,10 +26,17 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->libdir . '/externallib.php');
 require_once($CFG->libdir . '/authlib.php');
 require_once($CFG->dirroot . '/user/editlib.php');
 require_once($CFG->dirroot . '/user/profile/lib.php');
+
+use core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_single_structure;
+use core_external\external_multiple_structure;
+use core_external\external_value;
+use core_external\external_format_value;
+use core_external\external_warnings;
 
 /**
  * Auth e-mail external functions
@@ -50,7 +57,7 @@ class auth_external_external extends external_api {
     protected static function check_signup_enabled() {
         global $CFG;
 
-        if (empty($CFG->registerauth) or $CFG->registerauth != 'external') {
+        if (empty($CFG->registerauth) || $CFG->registerauth != 'external') {
             throw new moodle_exception('registrationdisabled', 'error');
         }
     }

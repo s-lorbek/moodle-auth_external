@@ -27,7 +27,11 @@ use moodle_url;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class hook_callbacks {
-
+    /**
+     * Callback for before_http_headers hook to inject signup JS.
+     *
+     * @param \core\hook\output\before_http_headers $hook The hook payload.
+     */
     public static function onload(\core\hook\output\before_http_headers $hook): void {
         global $PAGE;
         if (strpos($PAGE->url, "/login/signup.php")) {
